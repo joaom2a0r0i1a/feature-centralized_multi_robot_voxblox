@@ -19,9 +19,9 @@ static const FloatingPoint kUnitCubeDiagonalLength = std::sqrt(3.0);
 /// Merges layers.
 template <typename VoxelType>
 void mergeLayers(const Layer<VoxelType>& layer_A,
-                       Layer<VoxelType>* layer_B) {
+                 Layer<VoxelType>* layer_B) {
   CHECK_NOTNULL(layer_B);
-  const Layer<VoxelType>* layer_A_ptr;
+  const Layer<VoxelType>* layer_A_ptr = &layer_A;
 
   BlockIndexList block_idx_list_A;
   layer_A.getAllAllocatedBlocks(&block_idx_list_A);

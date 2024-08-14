@@ -19,6 +19,7 @@
 #include <voxblox/alignment/icp.h>
 #include <voxblox/core/tsdf_map.h>
 #include <voxblox/core/esdf_map.h>
+#include <voxblox/integrator/merge_integration.h>
 #include <voxblox/integrator/tsdf_integrator.h>
 #include <voxblox/io/layer_io.h>
 #include <voxblox/io/mesh_ply.h>
@@ -92,6 +93,10 @@ class CentralServer {
   ros::Publisher esdf_merged_map_pub_;
 
   ros::Publisher merged_mesh_pub_;
+
+  ros::Timer update_mesh_timer_;
+  ros::Timer publish_tsdf_map_timer_;
+  ros::Timer publish_esdf_map_timer_;
 
   voxblox::TsdfMap::Ptr tsdf_map_;
   voxblox::EsdfMap::Ptr esdf_map_;
