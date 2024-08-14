@@ -91,8 +91,9 @@ class CentralServer {
 
   ros::Publisher tsdf_merged_map_pub_;
   ros::Publisher esdf_merged_map_pub_;
-
   ros::Publisher merged_mesh_pub_;
+
+  ros::ServiceServer save_map_srv_;
 
   ros::Timer update_mesh_timer_;
   ros::Timer publish_tsdf_map_timer_;

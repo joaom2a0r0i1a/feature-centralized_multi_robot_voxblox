@@ -65,6 +65,9 @@ void CentralServer::setupRos() {
 
   merged_mesh_pub_ = nh_private_.advertise<voxblox_msgs::Mesh>("merged_mesh", 1, true);
 
+  save_map_srv_ = nh_private_.advertiseService(
+      "save_map", &CentralServer::saveMapCallback, this);
+
   double update_mesh_every_n_sec = 1.0;
   nh_private_.param("update_mesh_every_n_sec", update_mesh_every_n_sec,
                     update_mesh_every_n_sec);
