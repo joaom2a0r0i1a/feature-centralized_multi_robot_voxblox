@@ -16,6 +16,32 @@ namespace voxblox {
 
 static const FloatingPoint kUnitCubeDiagonalLength = std::sqrt(3.0);
 
+/// Merges layers.
+template <typename VoxelType>
+void mergeLayers(const Layer<VoxelType>& layer_A,
+                       Layer<VoxelType>* layer_B) {
+  CHECK_NOTNULL(layer_B);
+  const Layer<VoxelType>* layer_A_ptr;
+
+  BlockIndexList block_idx_list_A;
+  layer_A.getAllAllocatedBlocks(&block_idx_list_A);
+
+  for (const BlockIndex& block_idx : block_idx_list_A) {
+    typename Block<VoxelType>::ConstPtr block_A_ptr =
+        layer_A_ptr->getBlockPtrByIndex(block_idx);
+    typename Block<VoxelType>::Ptr block_B_ptr =
+        layer_B->getBlockPtrByIndex(block_idx);
+
+    if (!block_B_ptr) {
+      block_B_ptr = layer_B->allocateBlockPtrByIndex(block_idx);
+    }
+
+    if ((block_A_ptr != nullptr) && (block_B_ptr != nullptr)) {
+      block_B_ptr->mergeBlock(*block_A_ptr);
+    }
+  }
+}
+
 /// Merges layers, when the voxel or block size differs resampling occurs.
 template <typename VoxelType>
 void mergeLayerAintoLayerB(const Layer<VoxelType>& layer_A,

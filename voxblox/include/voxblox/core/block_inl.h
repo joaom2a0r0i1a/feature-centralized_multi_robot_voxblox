@@ -113,18 +113,14 @@ void Block<VoxelType>::mergeBlock(const Block<VoxelType>& other_block) {
   CHECK_EQ(other_block.voxel_size(), voxel_size());
   CHECK_EQ(other_block.voxels_per_side(), voxels_per_side());
 
-  if (!other_block.has_data()) {
-    return;
-  } else {
-    has_data() = true;
-    updated().set();
+  has_data() = true;
+  updated().set();
 
-    for (IndexElement voxel_idx = 0;
-         voxel_idx < static_cast<IndexElement>(num_voxels()); ++voxel_idx) {
-      mergeVoxelAIntoVoxelB<VoxelType>(
-          other_block.getVoxelByLinearIndex(voxel_idx),
-          &(getVoxelByLinearIndex(voxel_idx)));
-    }
+  for (IndexElement voxel_idx = 0;
+        voxel_idx < static_cast<IndexElement>(num_voxels()); ++voxel_idx) {
+    mergeVoxelAIntoVoxelB<VoxelType>(
+        other_block.getVoxelByLinearIndex(voxel_idx),
+        &(getVoxelByLinearIndex(voxel_idx)));
   }
 }
 

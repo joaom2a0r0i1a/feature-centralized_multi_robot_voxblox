@@ -16,6 +16,7 @@ cs_add_library(${PROJECT_NAME}
   src/intensity_server.cc
   src/transformer.cc
   src/tsdf_server.cc
+  src/central_server.cc
 )
 
 ############
@@ -36,6 +37,11 @@ cs_add_executable(esdf_server
   src/esdf_server_node.cc
 )
 target_link_libraries(esdf_server ${PROJECT_NAME})
+
+cs_add_executable(central_server
+  src/central_server_node.cc
+)
+target_link_libraries(central_server ${PROJECT_NAME})
 
 cs_add_executable(intensity_server
   src/intensity_server_node.cc
