@@ -296,6 +296,14 @@ void SimpleTsdfIntegrator::integrateFunction(const Transformation& T_G_C,
     while (ray_caster.nextRayIndex(&global_voxel_idx)) {
       TsdfVoxel* voxel =
           allocateStorageAndGetVoxelPtr(global_voxel_idx, &block, &block_idx);
+          
+      if (freespace_points && voxel->weight >= 0.01) {
+        if (voxel->distance <= 0.0) {
+          break;
+        } else {
+          continue;  
+        }
+      }
 
       const float weight = getVoxelWeight(point_C);
 
@@ -544,6 +552,14 @@ void FastTsdfIntegrator::integrateFunction(const Transformation& T_G_C,
 
       TsdfVoxel* voxel =
           allocateStorageAndGetVoxelPtr(global_voxel_idx, &block, &block_idx);
+          
+      if (freespace_points && voxel->weight >= 0.01) {
+        if (voxel->distance <= 0.0) {
+          break;
+        } else {
+          continue;  
+        }
+      }
 
       const float weight = getVoxelWeight(point_C);
 

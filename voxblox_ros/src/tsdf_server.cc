@@ -312,10 +312,10 @@ void TsdfServer::processPointCloudMessageAndInsert(
   }
 
   timing::Timer block_remove_timer("remove_distant_blocks");
-  tsdf_map_->getTsdfLayerPtr()->removeDistantBlocks(
-      T_G_C.getPosition(), max_block_distance_from_body_);
-  mesh_layer_->clearDistantMesh(T_G_C.getPosition(),
-                                max_block_distance_from_body_);
+  //tsdf_map_->getTsdfLayerPtr()->removeDistantBlocks(
+  //    T_G_C.getPosition(), max_block_distance_from_body_);
+  //mesh_layer_->clearDistantMesh(T_G_C.getPosition(),
+  //                              max_block_distance_from_body_);
   block_remove_timer.Stop();
 
   // Callback for inheriting classes.
@@ -337,6 +337,8 @@ bool TsdfServer::getNextPointcloudFromQueue(
     queue->pop();
     return true;
   } else {
+    //ROS_WARN_THROTTLE(0.2, "Transformation failed.");
+    ROS_WARN_THROTTLE(2.0, "Queue size is %ld.", queue->size());
     if (queue->size() >= kMaxQueueSize) {
       ROS_ERROR_THROTTLE(60,
                          "Input pointcloud queue getting too long! Dropping "
@@ -349,6 +351,52 @@ bool TsdfServer::getNextPointcloudFromQueue(
   }
   return false;
 }
+
+/*// Checks if we can get the next message from queue.
+bool TsdfServer::getNextPointcloudFromQueue(
+    std::queue<sensor_msgs::PointCloud2::Ptr>* queue,
+    sensor_msgs::PointCloud2::Ptr* pointcloud_msg, Transformation* T_G_C) {
+  if (queue->empty()) {
+    return false;
+  }
+  while(!queue->empty()) {
+    *pointcloud_msg = queue->front();
+    if (transformer_.lookupTransform((*pointcloud_msg)->header.frame_id,
+          world_frame_,
+          (*pointcloud_msg)->header.stamp, T_G_C)) {
+      queue->pop();
+      return true;
+    } else {
+      ROS_WARN_THROTTLE(2.0, "Queue size is %ld.", queue->size());
+      ROS_WARN_THROTTLE(1, "Transform unavailable for timestamp %f. Skipping message.",
+                      (*pointcloud_msg)->header.stamp.toSec());
+      queue->pop();  // Skip only if TF is truly unavailable
+    }
+  }
+  return false;
+}*/
+
+/*// Checks if we can get the next message from queue.
+bool TsdfServer::getNextPointcloudFromQueue(
+    std::queue<sensor_msgs::PointCloud2::Ptr>* queue,
+    sensor_msgs::PointCloud2::Ptr* pointcloud_msg, Transformation* T_G_C) {
+  if (queue->empty()) {
+    return false;
+  }
+  *pointcloud_msg = queue->front();
+  if (transformer_.lookupTransform((*pointcloud_msg)->header.frame_id,
+        world_frame_,
+        (*pointcloud_msg)->header.stamp, T_G_C)) {
+    queue->pop();
+    return true;
+  } else {
+    ROS_WARN_THROTTLE(1, "Transform unavailable for timestamp %f. Skipping message.",
+                    (*pointcloud_msg)->header.stamp.toSec());
+    queue->pop();
+  }
+  return false;
+}*/
+
 
 void TsdfServer::insertPointcloud(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg_in) {

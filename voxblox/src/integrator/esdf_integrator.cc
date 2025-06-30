@@ -316,7 +316,10 @@ void EsdfIntegrator::processRaiseSet() {
     raise_.pop();
 
     EsdfVoxel* voxel = esdf_layer_->getVoxelPtrByGlobalIndex(global_index);
-    CHECK_NOTNULL(voxel);
+    //CHECK_NOTNULL(voxel);
+    if (voxel == nullptr) {
+      return;
+    }
 
     // Get the global indices of neighbors.
     Neighborhood<>::getFromGlobalIndex(global_index, &neighbor_indices);
@@ -380,7 +383,10 @@ void EsdfIntegrator::processOpenSet() {
     open_.pop();
 
     EsdfVoxel* voxel = esdf_layer_->getVoxelPtrByGlobalIndex(global_index);
-    CHECK_NOTNULL(voxel);
+    //CHECK_NOTNULL(voxel);
+    if (voxel == nullptr) {
+      return;
+    }
     voxel->in_queue = false;
 
     // Skip voxels that are unobserved or outside the ranges we care about.
@@ -497,7 +503,10 @@ void EsdfIntegrator::processOpenSet() {
 
 bool EsdfIntegrator::updateVoxelFromNeighbors(const GlobalIndex& global_index) {
   EsdfVoxel* voxel = esdf_layer_->getVoxelPtrByGlobalIndex(global_index);
-  CHECK_NOTNULL(voxel);
+  //CHECK_NOTNULL(voxel);
+  if (voxel == nullptr) {
+    return false;
+  }
   // Get the global indices of neighbors.
   Neighborhood<>::IndexMatrix neighbor_indices;
   Neighborhood<>::getFromGlobalIndex(global_index, &neighbor_indices);

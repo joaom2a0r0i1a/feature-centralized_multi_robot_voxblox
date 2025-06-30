@@ -102,6 +102,8 @@ bool Transformer::lookupTransformTf(const std::string& from_frame,
   // the future. Now we will just wait.
   if (!tf_listener_.canTransform(to_frame, from_frame_modified,
                                  time_to_lookup)) {
+    ROS_WARN_STREAM(
+        "Error getting TF transform from sensor frame: " << from_frame_modified);
     return false;
   }
 
@@ -113,6 +115,50 @@ bool Transformer::lookupTransformTf(const std::string& from_frame,
         "Error getting TF transform from sensor data: " << ex.what());
     return false;
   }
+  
+  /*bool can_transform = true;
+  if (!tf_listener_.canTransform(to_frame, from_frame_modified, time_to_lookup)) {
+    ROS_WARN_STREAM("[TF] Missing transform from '" << from_frame_modified
+        << "' to '" << to_frame << "' at time " << timestamp.toSec()
+        << ". Attempting fallback to latest available transform.");
+    can_transform = false;
+    if (!tf_listener_.canTransform(to_frame, from_frame_modified, ros::Time(0))) {
+      ROS_WARN_STREAM("[TF] Failed fallback to latest available transform.");
+      return false;
+    }
+  }
+  
+  try {
+    if (can_transform) {
+      tf_listener_.lookupTransform(to_frame, from_frame_modified, time_to_lookup, tf_transform);
+    } else {
+      tf_listener_.lookupTransform(to_frame, from_frame_modified, ros::Time(0), tf_transform);
+    }
+  } catch (tf::TransformException& ex) {  // NOLINT
+      ROS_ERROR_STREAM(
+          "Error getting TF transform from sensor data: " << ex.what());
+      return false;
+  }*/
+  
+  
+  
+  /*try {
+    if (!tf_listener_.canTransform(to_frame, from_frame_modified, time_to_lookup)) {
+      ROS_WARN_STREAM_THROTTLE(5.0,
+          "[TF] Missing transform from '" << from_frame_modified
+          << "' to '" << to_frame << "' at time " << timestamp.toSec()
+          << ". Attempting fallback to latest available transform.");
+      
+      // Fallback to latest available transform
+      tf_listener_.lookupTransform(to_frame, from_frame_modified, ros::Time(0), tf_transform);
+    } else {
+      tf_listener_.lookupTransform(to_frame, from_frame_modified, time_to_lookup, tf_transform);
+    }
+  } catch (tf::TransformException& ex) {  // NOLINT
+    ROS_ERROR_STREAM(
+        "Error getting TF transform from sensor data: " << ex.what());
+    return false;
+  }*/
 
   tf::transformTFToKindr(tf_transform, transform);
   return true;
