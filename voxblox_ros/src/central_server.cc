@@ -43,19 +43,26 @@ void CentralServer::setupRos() {
   nh_private_.param("publish_tsdf_map", publish_tsdf_map_, publish_tsdf_map_);
   nh_private_.param("publish_esdf_map", publish_esdf_map_, publish_esdf_map_);
   nh_private_.param("verbose", verbose_, verbose_);
+  nh_private_.param("num_uavs", num_uavs_, num_uavs_);
 
   // Mesh settings.
   std::string color_mode("");
   nh_private_.param("color_mode", color_mode, color_mode);
   color_mode_ = getColorModeFromString(color_mode);
 
-  tsdf_map_sub1_ = nh_private_.subscribe("/uav1/voxblox_node/tsdf_map_out", 1, &CentralServer::tsdfMapCallback, this);
-  tsdf_map_sub2_ = nh_private_.subscribe("/uav2/voxblox_node/tsdf_map_out", 1, &CentralServer::tsdfMapCallback, this);
-  tsdf_map_sub3_ = nh_private_.subscribe("/uav3/voxblox_node/tsdf_map_out", 1, &CentralServer::tsdfMapCallback, this);
+  for (int i = 1; i <= num_uavs_; ++i) {
+    std::string tsdf_topic = "/uav" + std::to_string(i) + "/voxblox_node/tsdf_map_out";
+    std::string esdf_topic = "/uav" + std::to_string(i) + "/voxblox_node/esdf_map_out";
 
-  esdf_map_sub1_ = nh_private_.subscribe("/uav1/voxblox_node/esdf_map_out", 1, &CentralServer::esdfMapCallback, this);
-  esdf_map_sub2_ = nh_private_.subscribe("/uav2/voxblox_node/esdf_map_out", 1, &CentralServer::esdfMapCallback, this);
-  esdf_map_sub3_ = nh_private_.subscribe("/uav3/voxblox_node/esdf_map_out", 1, &CentralServer::esdfMapCallback, this);
+    ros::Subscriber tsdf_sub = nh_private_.subscribe(
+        tsdf_topic, 1, &CentralServer::tsdfMapCallback, this);
+
+    ros::Subscriber esdf_sub = nh_private_.subscribe(
+        esdf_topic, 1, &CentralServer::esdfMapCallback, this);
+
+    tsdf_map_subs_.push_back(tsdf_sub);
+    esdf_map_subs_.push_back(esdf_sub);
+  }
 
   tsdf_merged_pointcloud_pub_ = nh_private_.advertise<pcl::PointCloud<pcl::PointXYZI> >("tsdf_pointcloud", 1, true);
   esdf_merged_pointcloud_pub_ = nh_private_.advertise<pcl::PointCloud<pcl::PointXYZI> >("esdf_pointcloud", 1, true);
@@ -99,34 +106,30 @@ void CentralServer::setupRos() {
   }
 }
 
-void CentralServer::tsdfMapCallback(const voxblox_msgs::Layer& layer_msg) {
+void CentralServer::tsdfMapCallback(const voxblox_msgs::Layer::ConstPtr& layer_msg) {
   if (!publish_tsdf_map_) {
       return;
   }
-  //Layer<TsdfVoxel>* layer_msg_converted = nullptr;
   Layer<TsdfVoxel> layer_msg_converted(tsdf_map_->getTsdfLayerPtr()->voxel_size(), tsdf_map_->getTsdfLayerPtr()->voxels_per_side());
-  bool success = deserializeMsgToLayer<TsdfVoxel>(layer_msg, &layer_msg_converted);
+  bool success = deserializeMsgToLayer<TsdfVoxel>(*layer_msg, &layer_msg_converted);
   if (!success) {
     ROS_ERROR_THROTTLE(10, "Got an invalid TSDF map message!");
   } else {
     voxblox::mergeLayerAintoLayerB(layer_msg_converted, tsdf_map_->getTsdfLayerPtr());
   }
-  //publishTsdfMergedMap();
 }
 
-void CentralServer::esdfMapCallback(const voxblox_msgs::Layer& layer_msg) {
+void CentralServer::esdfMapCallback(const voxblox_msgs::Layer::ConstPtr& layer_msg) {
   if (!publish_esdf_map_) {
       return;
   }
-  //Layer<EsdfVoxel>* layer_msg_converted = nullptr;
   Layer<EsdfVoxel> layer_msg_converted(esdf_map_->getEsdfLayerPtr()->voxel_size(), esdf_map_->getEsdfLayerPtr()->voxels_per_side());
-  bool success = deserializeMsgToLayer<EsdfVoxel>(layer_msg, &layer_msg_converted);
+  bool success = deserializeMsgToLayer<EsdfVoxel>(*layer_msg, &layer_msg_converted);
   if (!success) {
     ROS_ERROR_THROTTLE(10, "Got an invalid ESDF map message!");
   } else {
     voxblox::mergeLayers(layer_msg_converted, esdf_map_->getEsdfLayerPtr());
   }
-  //publishEsdfMergedMap();
 }
 
 void CentralServer::publishTsdfPointclouds() {

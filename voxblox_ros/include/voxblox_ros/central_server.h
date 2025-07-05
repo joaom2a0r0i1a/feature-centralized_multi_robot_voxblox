@@ -50,8 +50,8 @@ class CentralServer {
 
   void setupRos();
 
-  void tsdfMapCallback(const voxblox_msgs::Layer& layer_msg);
-  void esdfMapCallback(const voxblox_msgs::Layer& layer_msg);
+  void tsdfMapCallback(const voxblox_msgs::Layer::ConstPtr& layer_msg);
+  void esdfMapCallback(const voxblox_msgs::Layer::ConstPtr& layer_msg);
 
   void publishTsdfPointclouds();
   void publishEsdfPointclouds();
@@ -80,11 +80,12 @@ class CentralServer {
   bool publish_esdf_pointclouds_;
   bool publish_tsdf_map_;
   bool publish_esdf_map_;
+  int num_uavs_;
 
   ColorMode color_mode_;
-  
-  ros::Subscriber tsdf_map_sub1_, tsdf_map_sub2_, tsdf_map_sub3_;
-  ros::Subscriber esdf_map_sub1_, esdf_map_sub2_, esdf_map_sub3_;
+
+  std::vector<ros::Subscriber> tsdf_map_subs_;
+  std::vector<ros::Subscriber> esdf_map_subs_;
 
   ros::Publisher tsdf_merged_pointcloud_pub_;
   ros::Publisher esdf_merged_pointcloud_pub_;
